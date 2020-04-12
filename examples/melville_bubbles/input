@@ -1,0 +1,52 @@
+Solitary wave runup ting's case
+$numparam
+0.0,0.005,23,0.1,0.5,1.0   <==start_t, delt,twfin,prtdt,sfdt,utot
+   3,3,1,1   <==kl,kr,kt,kb
+$end
+$fldparam
+   1.0e-06,-0.0,-9.8,0.,0.0,1000.  <==xnu,gx,gy,ui,vi,rhof
+$end
+$mesh
+   3,-5.,0.,5.,15.,-1.,4.,10.,110,250,500,40,100,200, <==nkx,xl(nkx+1),xc(nkx),nxl(nkx),nxr(nky) 
+   0.025,0.01,0.01                         <==dxmn(nkx)
+   1,0.0,0.75,0.6,140,60             <==nky,yl(nky+1),yc(nky),nyl(nky),nyr(nky)
+   0.0025           <==dymn(nky)
+$end
+$obstcl
+   1    <==nobstype
+   1    <==nobs
+   0.0,0.0,0.0,1.0 <==oa2(nobs),oa1(nobs),ob2(nobs),ob1(nobs)
+   0.0,0.0,1       <==oc2(nobs),oc1(nobs),ioh(nobs)
+$end
+$porous material information$
+   0              <==npor
+$end
+$freesurf
+   1                     <==nfrsrf
+   0.,0.0                                   <==fa2(nfrsrf),fa1(nfrsrf)
+   0.,-1.0                           <==fb2(nfrsrf),fb1(nfrsrf)
+   0.,0.6,1                                  <==fc2(nfrsrf),fc1(nfrsrf),ifh(nfrsrf)
+   0.,0.                                         <==fd2(nfrsrf),fd1(nfrsrf)
+   0.,0.                                          <==fe2(nfrsrf),fe1(nfrdrf)
+   0.,0.                                   <==nxf(nfrsrf),mxf(nfrsrf)
+   0.,0.                                  <==nyf(nfrsrf),myf(nfrsrf)
+   0.4              <==flht
+$end
+$wave parameter$
+   0.128,0.4,0.4,100                 <==aa,h0,h0r,ninflow 
+   147,156,37,68,44,1 
+$end                                   
+$output format$
+   1,0,0        <==lout,nanimation,nmean
+   1,6.9,0,6000,0.02
+$end
+$other parameters$
+   4,0.00001,1,0,0,0,1,0                <==kemode,roughness,nopen,npollutant,nrs,novertop,nfree,islip
+$end
+$moving body$
+   0,0.01       <==nmb
+   0.0,0.0       <==uxmb,vymb
+$end
+
+
+
