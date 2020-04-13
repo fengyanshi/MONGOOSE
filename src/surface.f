@@ -46,8 +46,8 @@ c
 200	continue
 99	continue
 c print
-        write(43,190)t,(etah(i),i=1,imax)
-190     format(100f8.5)
+c        write(43,190)t,(etah(i),i=1,imax)
+190     format(100f10.5)
 	return
 	end
 
@@ -57,7 +57,7 @@ c print
 	
 	print*,imax,etah(1)
 	
-         write(43,*)(etah(i),i=1,imax)
- 100     format(100f8.5)
+c         write(43,*)(etah(i),i=1,imax)
+ 100     format(100f10.5)
         
         end

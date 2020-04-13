@@ -105,7 +105,9 @@ c
 c.... Namelist /numparam/
 c
       con = 0.30d0
-      dtmax = 0.5d0
+c      dtmax = 0.5d0
+c fyshi changed a larger number
+      dtmax = 100.0
       alpha = 0.3d0
       autot = 1.0d0
       erriccg = 1.0d-08
@@ -271,10 +273,11 @@ c
 c...  read initial input data; write it out to paper and film
 c
         read(5,*)
-        read(5,*)delt,twfin,prtdt,autot
+        read(5,*)t_start,delt,twfin,prtdt,autot
         read(5,*)kl,kr,kt,kb
         read(5,*)
         write(13,numparam)
+c fyshi comment this off
 	  dtmax=min(dtmax,delt*2.5)
 
         read(5,*)
@@ -421,17 +424,21 @@ C.......define simple porous layer (npor=10; allow partial cell)
 C.......read wave parameter
 	  read(5,*)
 	  read(5,*)aa,h0,h0r,ninflow
-      if (kl.ne.6.and.ninflow.ne.7.and.ninflow.ne.8.and.ninflow.ne.70.
+	  if (kl.ne.6.and.ninflow.ne.7.and.ninflow.ne.8.and.ninflow.ne.70.
      &	and.ninflow.ne.80.and.ninflow.ne.71.and.ninflow.ne.81.and.
      &	ninflow.ne.100.and.ninflow.ne.0.and.ninflow.ne.10) then
-	write(*,*)'inconsistence between kl and ninflow; respecify'
-	stop
+		write(*,*)'inconsistence between kl and ninflow; respecify'
+c		stop
 	  endif
         write(9,*)'wave height is',aa,'inflow water depth is',h0,
      &	'outflow water depth is',h0r,'type of inflow is',ninflow
         if (ninflow.eq.100) then
-	read(5,*)isources,isourcee,jsources,jsourcee,nsource,tsource
+c tsource is useless for irregular waves, note that isources ... are i,j
+c rather than x, y, make change it later fyshi
+		read(5,*)isources,isourcee,jsources,jsourcee,nsource,tsource
 		xxt=tsource
+c if irregular waves, tsource represents peak period		
+		xxl_sponge=sqrt(-gy*h0)*tsource		
 	  endif
 
 C.......if pressure-driven wavemaker is used (currently only linear wave
@@ -442,11 +449,37 @@ C.......sym=.false. to ensure correct pressure computation
         if (ninflow.eq.100) then
 C.........irregular wave
           if (nsource.eq.44) then
-	      read(5,*)nwave
-		  do nw=1,nwave
-		    read(5,*)aawave(nw),twave(nw)
-		  end do
-	      do nw=1,nwave
+c	      read(5,*)nwave
+c		  do nw=1,nwave
+c		    read(5,*)aawave(nw),twave(nw)
+c		  end do
+c to keep consistent with marife reading format is changed here -fyshi
+c phase read here fyshi, use TSmooth as in marife
+            open(10,file='spectral')   
+            read (10,*) nwave, (aawave(nw),nw=1,nwave), 
+     &       (twave(nw),nw=1,nwave), (phase(nw),nw=1,nwave)
+            close(10)
+c in marife a smooth function is used for irreqular waves
+c I don't see any improvement with that -fyshi
+
+               TSmooth=twave(1)
+
+c if aawave(nw) is energy density change it to amplitude -fyshi
+c             do nw=1,nwave-1
+c              aawave(nw)=aawave(nw)*(1./twave(nw+1)-1./twave(nw))
+c             enddo
+c              aawave(nwave)=aawave(nwave-1)
+
+c through a regular wave test aawave give a height of aawave/4
+c it is supposed to be aawave/2 according to Lin et al 1999
+c In Lara's file called i36_linea.dat, the definition of 'H' 
+c is not clear. Here I give a factor of 1 - fyshi
+
+             do nw=1,nwave
+              aawave(nw)=aawave(nw)*1.
+             enddo
+
+             do nw=1,nwave
 C...........calculate the wave number based on dispersion relation using
 C...........Newton Ralphson method
               segmasqr=(2.0d0*pi/twave(nw))**2
@@ -674,7 +707,7 @@ C.........ninflow=7 is the horizontal jet and ninflow=8 is the vertical jet
 	    read(5,*)ujet,vjet,wjet,yjet,time_jet
 	    yup=yjet+wjet/2
 	    ylow=yjet-wjet/2
-       if (ninflow.eq.71.or.ninflow.eq.81) ustar=sqrt(ujet**2+vjet**2)
+	   if (ninflow.eq.71.or.ninflow.eq.81) ustar=sqrt(ujet**2+vjet**2)
      &	  /(5.75*log10(wjet/2/0.0001)+6.0)
 	  endif
 
@@ -840,7 +873,7 @@ C.......output location
         if (lout.eq.1) then
           read(5,*)nloc,(xout(i),i=1,nloc),xxxf,ttend,prtdt_t
           do 88 n=1,nloc
-            open(700+5*(n-1)+1,file=fdir//
+            open(700+5*(n-1)+1,file=trim(fdir)//
      &      'gage'//achac(n),status="unknown")
 88        continue
         endif
@@ -877,7 +910,11 @@ C.......read other parameters
      &	islip
 
 	  if (nopen.eq.11) then
+	  if (nsource.eq.44)then
+	        xsponge=1.5*xxl_sponge
+          else
 		xsponge=1.5*xxl
+	  endif
 	    adamp=200.0
 	    power=10.0
 		write(*,*)'sponge layer parameter',xsponge,adamp,power
@@ -1017,7 +1054,9 @@ c.... flux limiter
       fcvlim=1.3*con
    10 continue
 c.... minimum time step
-      dtend=0.0001*delt
+c ... it's not necessary to set this dtend. I set zero
+c      dtend=0.0001*delt
+       dtend=0.0
       if (dmpdt.eq.0.0) dmpdt=twfin
       twdmp=dmpdt
       frsurf=frctn*rhof

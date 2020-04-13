@@ -609,13 +609,13 @@ c##############################################################
         write(fname(4:4),'(I1)')n_fourth
 
 
-        open(32,file=fdir//'data_ag.'//fname)
+        open(32,file=trim(fdir)//'data_ag.'//fname)
         do j=1,jmax
         write(32,999) (alpha_g(ij),ij=(j-1)*imax+1,(j-1)*imax+imax)
         end do
         close(32)
 
-        open(32,file=fdir//'data_pr.'//fname)
+        open(32,file=trim(fdir)//'data_pr.'//fname)
         do j=1,jmax
         write(32,99) (xprod(ij),ij=(j-1)*imax+1,(j-1)*imax+imax)
         end do
@@ -636,7 +636,7 @@ c##############################################################
         character*2 fsize
         character*1 ntype
         integer kcounter(mbub)
-c        data kcounter(1:mbub)/mbub*0/
+        data kcounter(1:mbub)/mbub*0/
 
         kcounter(m)=kcounter(m)+1
 
@@ -656,7 +656,7 @@ c        data kcounter(1:mbub)/mbub*0/
         write(fsize(1:1),'(I1)')n_first
         write(fsize(2:2),'(I1)')n_second
 
-        open(32,file=fdir//'data_c'//fsize//'.'//fname)
+        open(32,file=trim(fdir)//'data_c'//fsize//'.'//fname)
 
         print*,'printing bubble ...',fsize, '  at  ', fname
 
@@ -666,7 +666,7 @@ c        data kcounter(1:mbub)/mbub*0/
         close(32)
 
      
-c        open(32,file=fdir//'data_ag'//fsize//'.'//fname)
+c        open(32,file=trim(fdir)//'data_ag'//fsize//'.'//fname)
 
 c        print*,'printing bubble ...',fsize, '  at  ', fname
 
@@ -676,7 +676,7 @@ c        end do
 c        close(32)
 
 
-        open(32,file=fdir//'data_nb'//fsize//'.'//fname)
+        open(32,file=trim(fdir)//'data_nb'//fsize//'.'//fname)
 
         print*,'printing bubble ...',fsize, '  at  ', fname
 
@@ -685,7 +685,7 @@ c        close(32)
         end do
         close(32)
 
-        open(32,file=fdir//'data_ntransf'//fsize//'.'//fname)
+        open(32,file=trim(fdir)//'data_ntransf'//fsize//'.'//fname)
 
         print*,'printing bubble ...',fsize, '  at  ', fname
 

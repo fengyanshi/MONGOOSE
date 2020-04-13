@@ -76,6 +76,11 @@ c
       twprt=tstart
 	twplt=twprt
       twprt_a=tstart_a
+
+c initial uvz
+        if(ninflow.eq.101) then
+         call initial_uvz
+        endif
 c
 c.... Begin cycle
 c
@@ -166,6 +171,55 @@ c
 	close(12)
 	close(13)
 
+      end
+
+      subroutine initial_uvz
+c##############################################################
+      implicit real*8 (a-h,o-z)
+      
+c##############################################################
+c
+c############
+      include  "comdk2.h"
+      include  "bubble1.h" 
+      real eta_1d(imax),u_1d(imax)
+c############
+
+      print*,'read u v eta, specified in main.f subroutine'
+      print*, 'initial_uvz'
+      print*, 'imax,jmax = ', imax, jmax
+      
+      open(1,file='eta_ripple.txt')
+       do i=1,imax
+         read(1,*) eta_1d(i)
+       enddo
+       close(1)
+      open(1,file='u_ripple.txt')
+       do i=1,imax
+         read(1,*) u_1d(i)
+       enddo
+       close(1)
+
+      do i=1,imax
+       do 20 j=1,jmax
+
+         eta10=eta_1d(i)
+         ij1=(j-1)*imax+i
+
+         f(ij1)=(eta10-y(j))/dely(j)
+         if(f(ij1).le.em6) f(ij1)=0.0
+         if(f(ij1).ge.(1.0-em6)) f(ij1)=1.0
+
+         p(ij1)=(eta10-yj(j))*9.8*rhof
+         
+         u(ij1)=u_1d(i)
+         v(ij1)=0.0
+
+20    continue
+
+      enddo
+
+      return
       end
 
       subroutine newcyc
@@ -639,7 +693,7 @@ c
 c.... exit from newcyc and terminate
 c
 c     --------------------------
-c	routine='NEWCYC'
+c	routine="NEWCYC"
 c      call kill (iotty,ncyc,routine,nexit)
 c     --------------------------
 c

@@ -1,0 +1,67 @@
+Sample case: porous structure and caisson
+$numparam
+   0.0, 0.01,150,0.5,0.05,1.0          = start_t,delt,twfin,prtdt,sfdt,utot
+   6,3,1,1   = kl,kr,kt,kb
+$end
+$fldparam
+   1.0e-06,-0.0,-9.8,0.,0.0,1000.  = xnu,gx,gy,ui,vi,rhof
+$end
+$mesh
+   1,0,400.0,200.0,200,200          = nkx,xl(nkx+1),xc(nkx),nxl(nkx),nxr(nky) 
+   1.0                          = dxmn(nkx)
+   1,0.0,12.0,10.0,40,20        = nky,yl(nky+1),yc(nky),nyl(nky),nyr(nky)
+   0.1           =dymn(nky)
+$end
+$obstcl
+   1    = nobstype
+4
+0,-0,0,1
+0,-11,1
+0,1,0,0
+0,-250,0
+0,-1,0,0
+0,260,0
+0,0,0,1
+0,-2.5,0
+$end
+$porous material information$
+   1              =npor
+   1             = nportype
+   0.42,0.4,200.,1.1,0.34    1= d50(n), xporosity(n),xalpha(n),xbeta(n),xgamma(n)
+3
+0,-0,0,1
+0,-3,1
+0,0.15,0,-1
+0,-34.5,0
+0,-0.15,0,-1
+0,42,0
+$end
+$freesurf
+   1                     =nfrsrf
+   0.,0.0                =fa2(nfrsrf),fa1(nfrsrf)
+   0.,-1.0               =fb2(nfrsrf),fb1(nfrsrf)
+   0.,10.0,1              =fc2(nfrsrf),fc1(nfrsrf),ifh(nfrsrf)
+   0.,0.                 =fd2(nfrsrf),fd1(nfrsrf)
+   0.,0.                 =fe2(nfrsrf),fe1(nfrdrf)
+   0.,0.                 =nxf(nfrsrf),mxf(nfrsrf)
+   0.,0.                 =nyf(nfrsrf),myf(nfrsrf)
+   10.0                   =flht
+$end
+$wave parameter$
+   2.11,16.05,16.05,100      =amp,dep,depr,wavemk(4:Stokes,5:solitary,24:cnoidal,34:linear) 
+   68, 71, 20, 30, 44, 12.5                   =T,areturn
+$end                                    
+$output format$
+   1,0,0        =lout,nanimation,nmean
+   5,490,495,498,510,520,0,6000,0.2
+$end
+$other parameters$
+   4,0.00001,11,0,0,0,1,0       =kemode,roughness,nopen,npollutant,nrs,novertop,nfree,islip
+$end
+$moving body$
+   0,0.01       =nmb
+   0.0,0.0      =uxmb,vymb
+$end
+
+
+

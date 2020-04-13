@@ -110,15 +110,10 @@ c
           endif
 
 C.......adding sponge layer (Wei and Kirby, 1995)
-c for irreqular waves the width of sponge layer depends on peak 
-c period
-c there is a bug here for x's origin is non-zero 
 	  if (nopen.eq.11) then
 		if (kl.eq.3) then
-		  xsponge_left=x(1)+xsponge
-		  if (x(i).le.xsponge_left) then
-			udamp=(exp(((xsponge_left-x(i))
-     &                 /xsponge)**power)-1.0)
+		  if (x(i).le.xsponge) then
+			udamp=(exp(((xsponge-x(i))/xsponge)**power)-1.0)
      &			/(exp(1.0)-1.0)
 C.....re-define gctmpr [1/(c+dt*f)]
 			fricold=(1./gctmpr-gctmpra)/delt
@@ -212,11 +207,8 @@ c
 C.......adding sponge layer
 	  if (nopen.eq.11) then
 		if (kl.eq.3) then
-c the same thing for v component. fyshi
-                xsponge_left=xi(1)+xsponge
-		  if (xi(i).le.xsponge_left) then
-			vdamp=(exp(((xsponge_left-xi(i))
-     &               /xsponge)**power)-1.0)
+		  if (xi(i).le.xsponge) then
+			vdamp=(exp(((xsponge-xi(i))/xsponge)**power)-1.0)
      &			/(exp(1.0)-1.0)
 C.....re-define gctmpt [1/(c+dt*f)]
 			fricold=(1./gctmpt-gctmpta)/delt
@@ -1451,17 +1443,13 @@ C.... limited by negative production
       if (delt.eq.crest) idt="np"
 
 C.....add to stop the program if delt is too small
-C fyshi comment this off
-c      if (delt.lt.1.0e-4*dtmax) then
-c        write(13,*)'delt',delt, 'is less than 1.0e-4*dtmax',
-c     &          dtmax*1.0e-4
-c        write(iotty,*)'delt',delt, 'is less than 1.0e-4*dtmax', 
-c     &		dtmax*1.0e-4
-C ... I found that the model can still survive when
-C     delt becomes dtmax*1.0e-4. The delt will increase after
-C     some time. I remove this critera, fyshi 06/2009
-C      nexit=9999 
-c      endif
+      if (delt.lt.1.0e-4*dtmax) then
+        write(13,*)'delt',delt, 'is less than 1.0e-4*dtmax',
+     &          dtmax*1.0e-4
+        write(iotty,*)'delt',delt, 'is less than 1.0e-4*dtmax', 
+     &		dtmax*1.0e-4
+        nexit=9999 
+      endif
 
       return
       end
@@ -2396,32 +2384,15 @@ C.........added source term
      &		ssource*sin(2.0*pi/tsource*t)
 	      endif
             if (nsource.eq.44) then
-c			if (nirrgwvct.eq.0) then
+			if (nirrgwvct.eq.0) then
 			  sswave=0.0
-c  smooth and phase info are added here fyshi
+C.........here is the place where random phase angle can be included if needed
 	          do nw=1,nwave
-             if(t.le.twave(1))then
-c               smooth=sin(pi*t/TSmooth*0.5)
-c I don't see any necessity to use smooth function
-                smooth=1.0
-             else
-               smooth=1.0
-             endif
-c --- I made start_t only for phase so that we can split 
-c --- a long series.
-                  sswave=sswave+swave(nw)*sin(2.0*pi/twave(nw)*
-     &         (t+t_start)
-     &     +phase(nw))*smooth/delt
+                  sswave=sswave+swave(nw)*sin(2.0*pi/twave(nw)*t)
 	          end do
-c			  nirrgwvct=1
-c			end if
-
-c the previous code include '/delt' in the following 
-c formula, resulting in serious problem, I removed it
-c fyshi
-
-           srce(nm)=srce(nm)+ac(ij)*cvol(ij)/fact*sswave
-	   
+			  nirrgwvct=1
+			end if
+              srce(nm)=srce(nm)+ac(ij)*cvol(ij)/delt/fact*sswave			 
             endif
             if (nsource.eq.4) then
               srce(nm)=srce(nm)+ac(ij)*cvol(ij)/delt/fact*
@@ -5830,37 +5801,21 @@ c     ----------------
 c     ----------------
 c
 C.....output location
-c      if (nloc.ne.0) then
-c          kout=1
-c          if (xout(kout).lt.0.0) then
-c                nout(kout)=1
-c                kout=kout+1
-c                if (kout.gt.nloc) goto 89
-c          endif
-c          do 88 i=1,imax-1
-c	    if(kout.eq.3)then
-c	    print*,xout(kout),x(i),x(i+1)
-c	    endif
-c            if (xout(kout).ge.x(i).and.xout(kout).lt.x(i+1)) then
-c                nout(kout)=i+1
-c                kout=kout+1
-c                if (kout.gt.nloc) goto 89
-c            endif
-c88        continue
-c89        continue
-
-c there is a bug above, it requirs dx should be smaller than 
-c gage interval, I modified it in the following, fyshi 
-c 06/04/09
-
       if (nloc.ne.0) then
-        do kout=1,nloc
-          do i=1,imax-1
+          kout=1
+          if (xout(kout).lt.0.0) then
+                nout(kout)=1
+                kout=kout+1
+                if (kout.gt.nloc) goto 89
+          endif
+          do 88 i=1,imax-1
             if (xout(kout).ge.x(i).and.xout(kout).lt.x(i+1)) then
-             nout(kout)=i+1
+                nout(kout)=i+1
+                kout=kout+1
+                if (kout.gt.nloc) goto 89
             endif
-          enddo
-        enddo
+88        continue
+89        continue
       endif
 
       if (npollutant.ne.0) then
@@ -6560,9 +6515,9 @@ C.............evaluate dv/dx at the cell center
 			vlc=0.5*(v(max(1,imj))*at(max(1,imj))+v(max(1,imjm))
      &         *at(max(1,imjm)))
 			if (nf(max(1,imj)).eq.6) vlc=vcc
-	vpc=(vcc*delx(i+1)+vrc*delx(i))/(delx(i+1)+delx(i))
+			vpc=(vcc*delx(i+1)+vrc*delx(i))/(delx(i+1)+delx(i))
 	vmc=(vcc*delx(max(1,i-1))+vlc*delx(i))/(delx(max(1,i-1))+delx(i))
-	dvdxc=(vpc-vmc)/delx(i)
+			dvdxc=(vpc-vmc)/delx(i)
 
 C.............define dudxc and dvdyc
 			dudxc=tauxx(ij)
@@ -7065,7 +7020,6 @@ C   45     if (mod(ncyc,2).eq.0) go to 10
    55 continue
 
 	if (ninflow.eq.100) then
-c I think f is redefined for an internal wavemaker, but it's OK -fyshi
           if (i.ge.isources.and.i.le.isourcee.and.
      &    j.ge.jsources.and.j.le.jsourcee) f((j-1)*imax+i)=1.0
 	endif
@@ -7195,7 +7149,7 @@ C			f(ij)=0.0d0
      1             ar(imj)*r(i-1)*(u(imj)-uxmb(nmovbd(ij))))+rdy(j)*
      2             (at(ij)*ri(i)*(v(ij)-vymb(nmovbd(ij)))-at(ijm)*ri(i)*
      3             (v(ijm)-vymb(nmovbd(ij)))))/(ri(i))
-	4			 /cvmgt(ac(ij),1.0d0,nf(ij).ne.0.or.fn(ij).le.0.9)
+     4		   /cvmgt(ac(ij),1.0d0,nf(ij).ne.0.or.fn(ij).le.0.9)
           f(ij)=f(ij)+dt*fn(ij)*divergence
    80 continue
 c
@@ -7816,7 +7770,6 @@ c       -----------------
 	    end do
 
           if (ninflow.eq.100) then
-c f defined here, but redefined later - fyshi
             do i=isources,isourcee
             do j=jsources,jsourcee
                 f((j-1)*imax+i)=1.0
@@ -9311,12 +9264,12 @@ c      call global
 c.... write out mesh information
 
 c
-        open(2,file=trim(fdir)//'data_status.dat')
-        open(3,file=trim(fdir)//'data_xi.dat')
-        open(4,file=trim(fdir)//'data_yj.dat')
-        open(23,file=trim(fdir)//'data_ar.dat')
-        open(24,file=trim(fdir)//'data_at.dat')
-        open(43,file=trim(fdir)//'surface.dat')
+        open(2,file=fdir//'data_status.dat')
+        open(3,file=fdir//'data_xi.dat')
+        open(4,file=fdir//'data_yj.dat')
+        open(23,file=fdir//'data_ar.dat')
+        open(24,file=fdir//'data_at.dat')
+        open(43,file=fdir//'surface.dat')
 
 
         write(2,*) imax,jmax,prtdt,1
@@ -9331,7 +9284,7 @@ c
         write(24,99) (at(ij),ij=(j-1)*imax+1,(j-1)*imax+imax)
         end do
 
- 99     format(3x,3000(E16.6))
+ 99     format(3x,3000(f8.3))
         close(2)
         close(3)
         close(4)
@@ -9377,13 +9330,13 @@ c       output F function and velocity vectors  Qun
         write(fname(3:3),'(I1)')n_third
         write(fname(4:4),'(I1)')n_fourth
 
-        open(25,file=trim(fdir)//'data_f.'//fname)
-        open(26,file=trim(fdir)//'data_u.'//fname)
-        open(27,file=trim(fdir)//'data_v.'//fname)
-        open(28,file=trim(fdir)//'data_p.'//fname)
-c        open(29,file=trim(fdir)//'data_h.'//fname)
-        open(30,file=trim(fdir)//'data_prod.'//fname)
-        open(31,file=trim(fdir)//'data_k.'//fname)
+        open(25,file=fdir//'data_f.'//fname)
+        open(26,file=fdir//'data_u.'//fname)
+        open(27,file=fdir//'data_v.'//fname)
+        open(28,file=fdir//'data_p.'//fname)
+c        open(29,file=fdir//'data_h.'//fname)
+        open(30,file=fdir//'data_prod.'//fname)
+        open(31,file=fdir//'data_k.'//fname)
 
         print*,'printing...',fname
 

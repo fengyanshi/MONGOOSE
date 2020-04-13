@@ -12,7 +12,7 @@ data_xi=load([fdir 'data_xi.dat']);
 data_yj=load([fdir 'data_yj.dat']);
 
 
-%obs=load([fdir 'data_ar.dat']);
+porous=load(['porous']);
 obs=load('obs');
 x=data_xi;
 y=data_yj;
@@ -20,12 +20,16 @@ y=data_yj;
 % draw domain
 figure(1)
 clf
-pcolor(x,y,obs),shading flat
+porous(porous==1)=NaN;
+pcolor(x,y,-porous),shading flat
 hold on
+obs(obs==1)=NaN;
+pcolor(x,y,obs-1),shading flat
 plot([0 400],[10 10],'k','LineWidth',2)
 xlabel('x (m)')
 ylabel('y (m)')
-print('-djpeg100','plots/domain_brk.jpg')
+grid
+print('-djpeg100','plots/irregular_domain.jpg')
 
 % draw grid
 figure(2)
@@ -37,7 +41,7 @@ line(X(1:sky:end,1:skx:end),Y(1:sky:end,1:skx:end))
 line(X(1:sky:end,1:skx:end)',Y(1:sky:end,1:skx:end)')
 xlabel('x (m)')
 ylabel('y (m)')
-print('-djpeg100','plots/mesh_brk.jpg')
+print('-djpeg100','plots/irregular_mesh.jpg')
 
 
 figure(3)
@@ -47,29 +51,29 @@ wid=6;
 len=12;
 set(gcf,'units','inches','paperunits','inches','papersize', [8 8],'position',[1 1 8 8],'paperposition',[0 0 8 8]);
 
-nfile=[40 50 60];
+nfile=[40 80 100];
 
 
 for kt=1:length(nfile)
     file_num=sprintf('%.4d',nfile(kt));
     
 data_f=load([fdir 'data_f.' file_num]);
-%data_k=load([fdir 'data_k.' file_num]);
-%a=size(data_k);  nmax=a(1,1)/jmax;
 
 subplot(length(nfile), 1, kt)
 	 
- data_f(obs<1)=NaN;
- %data_f(data_f<1)=NaN;
+ %data_f(obs<1)=NaN;
  pcolor(x,y,-data_f),shading flat
      hold on
      contour(x,y,-data_f,[-0.5 -0.5],'LineWidth',2,'Color','r','LineStyle','-')
 title(['time = ' num2str(nfile(kt)*0.5) ' s '])
+por=pcolor(x,y,porous),shading flat
      grid
      axis([0 400 0 12])
+alpha(por,.5)
+pcolor(x,y,obs),shading flat
 end
 
-print('-djpeg100','plots/eta_brk.jpg')
+print('-djpeg100','plots/irregular_eta.jpg')
 
 % k
 figure(4)
@@ -79,7 +83,7 @@ wid=6;
 len=12;
 set(gcf,'units','inches','paperunits','inches','papersize', [8 8],'position',[1 1 8 8],'paperposition',[0 0 8 8]);
 
-nfile=[40 50 60];
+nfile=[40 80 100];
 
 
 for kt=1:length(nfile)
@@ -93,7 +97,6 @@ a=size(data_k);  nmax=a(1,1)/jmax;
 
 subplot(length(nfile), 1, kt)
 	 
- data_k(obs<1)=NaN;
  pcolor(x,y,data_k),shading flat
 caxis([0 0.1])
      hold on
@@ -105,14 +108,65 @@ title(['time = ' num2str(nfile(kt)*0.5) ' s '])
 % vector
 skx=4;
 sky=2;
-scx=5;
+scx=2;
 scy=1;
 quiver(X(1:sky:end,1:skx:end),Y(1:sky:end,1:skx:end),data_u(1:sky:end,1:skx:end)*scx,data_v(1:sky:end,1:skx:end)*scy,0)
 
-
+por=pcolor(x,y,porous),shading flat
+alpha(por,.5);
+pcolor(x,y,obs+1),shading flat
 end
 
-print('-djpeg100','plots/k_brk.jpg')
+print('-djpeg100','plots/irregular_k.jpg')
+
+
+% ----------
+% k
+figure(5)
+clf
+icount=0;
+wid=6;
+len=12;
+set(gcf,'units','inches','paperunits','inches','papersize', [8 8],'position',[1 1 8 8],'paperposition',[0 0 8 8]);
+
+nfile=[40 80 100];
+
+
+for kt=1:length(nfile)
+    file_num=sprintf('%.4d',nfile(kt));
+    
+data_f=load([fdir 'data_f.' file_num]);
+data_k=load([fdir 'data_k.' file_num]);
+data_u=load([fdir 'data_u.' file_num]);
+data_v=load([fdir 'data_v.' file_num]);
+data_p=load([fdir 'data_p.' file_num]);
+a=size(data_k);  nmax=a(1,1)/jmax;
+
+subplot(length(nfile), 1, kt)
+	 
+ pcolor(x,y,data_p),shading flat
+ 
+%caxis([0 0.1])
+     hold on
+     contour(x,y,-data_f,[-0.5 -0.5],'LineWidth',2,'Color','r','LineStyle','-')
+title(['time = ' num2str(nfile(kt)*0.5) ' s '])
+     grid
+     axis([0 400 0 12])
+
+% vector
+skx=4;
+sky=2;
+scx=2;
+scy=1;
+quiver(X(1:sky:end,1:skx:end),Y(1:sky:end,1:skx:end),data_u(1:sky:end,1:skx:end)*scx,data_v(1:sky:end,1:skx:end)*scy,0)
+
+por=pcolor(x,y,porous),shading flat
+alpha(por,.1);
+pcolor(x,y,obs+20000),shading flat
+end
+
+print('-djpeg100','plots/irregular_p.jpg')
+
 
 
 

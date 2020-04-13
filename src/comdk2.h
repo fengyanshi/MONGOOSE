@@ -1,10 +1,10 @@
-      parameter (ibar2=1602,jbar2=290,meshx=20,meshy=20,
+      parameter (ibar2=1802,jbar2=290,meshx=20,meshy=20,
      &           nobd=200,nfrsrfd=20,nprd=200)
       parameter (mshx=meshx+1, mshy=meshy+1, nxy=ibar2*jbar2)
 
       character*80 prbname
       character*8 dat,jnm,ochn,tim
-      character*10 fdir
+      character*22 fdir
       character*2 idt
       logical sym
 
@@ -14,7 +14,7 @@
       common /begini/ aa,h0,h0r,xcenter,alpha1,c1,
      1		xstart,tstart,tfinish,ybc(2000,40),ubc(2000,40),
      1      tstart_a,tfinish_a,prtdt_a,prtdt_t,twprt_a,
-     2      vbc(2000,40),xxxf,ttend,xxl,xxt,xxk,
+     2      vbc(2000,40),xxxf,ttend,xxl,xxt,xxk,xxl_sponge,
      3		xxlr,xxkr,c1r,crest,energyp0,
      3		segma,fxstart,t_pad(2000),u_pad(2000),h_pad(2000),
      4		x_pad(2000),ulinear,usecond,areturn,stn
@@ -26,7 +26,7 @@
 
       common /addition4/ xout(100)
 
-      common /addition14/ xpol(10),ypol(10),conc(10)
+      common /addition14/ xpol(20),ypol(20),conc(20)
 
 	  common /addition0/ ttmax,yjet,ujet,vjet,wjet,pjet,ylow,yup,xxc,
      3          time_jet,yout,uout,vout,wout,ylowout,yupout,
@@ -35,11 +35,14 @@
      5		eta0,eta1,eta1a,eta2,uleft1,vleft1,xmass0,xmass_d,
      5		xsaka,xmass_a,xmass_a1,xmass_a2,cnf,petit,
      5		umean,ratio,uturb,xovertop,overtopmass,
-     5		ssource,tsource,aawave(100),twave(100),cwave(100),
-     5		swave(100),nwave,isources,isourcee,jsources,jsourcee,
+     5		ssource,tsource,aawave(3010),twave(3010),cwave(3010),
+     5          phase(3010),
+     5		swave(3010),nwave,isources,isourcee,jsources,jsourcee,
      5		nsource,islip,ninflow,ibg,ieg,jbg,jeg,
      6		it,nnn,istable,interx,intery,nexit,
      7		istablemx,kemodel,npollutant,nweakref,nopen,novertop
+
+          common TSmooth
 c
       common /fldvarr/ un(nxy),vn(nxy),pn(nxy),fn(nxy),ar(nxy),at(nxy),
      4				dissipturb(nxy),dissipmole(nxy),productturb(nxy),
@@ -70,7 +73,7 @@ c
       common /meshi/ nxl(meshx),nxr(meshx),nyl(meshy),nyr(meshy)
 c
       common /intvarr/ delt,t,autot,prtdt,twprt,pltdt,twplt,
-     1             sfdt,sfprt,
+     1             sfdt,sfprt,t_start,
      1             twfin,xnu,dtend,dmpdt, rhof, vchgt, ttl,
      2             sigma, cyl, gx, gy, ui, vi, utop,
      3             alpha, beta, flgc, xmin, xmax, ymin,
