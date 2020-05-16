@@ -1,0 +1,80 @@
+Sample case: North Seawall - 5 yr RP waves
+$numparam
+   0.0,0.01,180.0,0.25,1.0,1.0          = start_t,delt,twfin,prtdt,sfdt,utot
+   3,3,1,1   = kl,kr,kt,kb
+$end
+$fldparam
+   1.0e-06,-0.0,-9.8,0.,0.0,1000.  = xnu,gx,gy,ui,vi,rhof
+$end
+$mesh
+   2,350,455,470,450,460,700,100,100,30          = nkx,xl(nkx+1),xc(nkx),nxl(nkx),nxr(nky) 
+   0.05 0.05                          = dxmn(nkx)
+   1,0,4.5,2.5,60,50        = nky,yl(nky+1),yc(nky),nyl(nky),nyr(nky)
+   0.02           =dymn(nky)
+$end
+$obstcl
+2    = nobstype
+2
+0,0,0,1
+0,-3.15,1
+0,1,0,0
+0,-455,0
+14	
+0,-1.65,0,-1
+0,752.2,1
+0,-2.1765,0,-1
+0,991.16,1
+0,-15.667,0,-1
+0,7116.5,1
+0,-1,0,0
+0,454.09,1
+0,-7.6667,0,1
+0,3479.2,1
+0,-2.5294,0,1
+0,1146.6,1
+0,-1.85,0,1
+0,838.19,1
+0,-1.45,0,1
+0,656.71,1
+0,-1.05,0,1
+0,475.31,1
+0,-1.2467,0,1
+0,564.46,1
+0,0.9375,0,-1
+0,-421.72,0
+0,0,0,-1
+0,3.76,0
+0,1,0,0
+0,-453.02,0
+0,-1,0,0
+0,455,0,0
+$end
+$porous material information$
+   0              =npor
+$end
+$freesurf
+   1                     =nfrsrf
+   0.,0.0                =fa2(nfrsrf),fa1(nfrsrf)
+   0.,-1.0               =fb2(nfrsrf),fb1(nfrsrf)
+   0.,2.6,1              =fc2(nfrsrf),fc1(nfrsrf),ifh(nfrsrf)
+   0.,0.                 =fd2(nfrsrf),fd1(nfrsrf)
+   0.,0.                 =fe2(nfrsrf),fe1(nfrdrf)
+   0.,0.                 =nxf(nfrsrf),mxf(nfrsrf)
+   0.,0.                 =nyf(nfrsrf),myf(nfrsrf)
+   2.6                   =flht
+$end
+$wave parameter$
+   0.6,2.6,2.6,100      =amp,dep,depr,wavemk(4:Stokes,5:solitary,24:cnoidal,34:linear) 
+   70,76,16,24,44,5.1                   =T,areturn
+$end                                   
+$output format$
+   1,0,0        =lout,nanimation,nmean
+   6,150,250,450,453.2,453.5,454,455,0,6000,0.1
+$end
+$other parameters$
+   4,0.00001,11,0,0,0,1,0       =kemode,roughness,nopen,npollutant,nrs,novertop,nfree,islip
+$end
+$moving body$
+   0,0.01       =nmb
+   0.0,0.0      =uxmb,vymb
+$end
