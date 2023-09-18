@@ -595,7 +595,7 @@ c output surface
 172    continue      
 
 
-       goto 1909
+c $$$       goto 1909
 c - put bubble fyshi
       if(t+em6.le.delt)then
        print*,'initial bubble ...',t
@@ -617,7 +617,7 @@ c
 c.... print field variable data on paper
       print*,'prtdt=',prtdt,t
 c
-      goto 1911
+c$$      goto 1911
       do k_bub=1,mbub
       call prtplt_bubble(k_bub)
       enddo
